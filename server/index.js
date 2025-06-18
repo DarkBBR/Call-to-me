@@ -7,7 +7,7 @@ const HOST = '0.0.0.0';
 const httpServer = createServer();
 const io = new Server(httpServer, {
   cors: {
-    origin: "https://call-to-me.vercel.app/",
+    origin: "https://call-to-me.vercel.app",
     methods: ["GET", "POST"]
   }
 });
