@@ -1,7 +1,7 @@
 import { Server } from "socket.io";
 import { createServer } from "http";
 
-const PORT = 3001;
+const PORT = "0.0.0.0";
 
 const httpServer = createServer();
 const io = new Server(httpServer, {
@@ -9,6 +9,12 @@ const io = new Server(httpServer, {
     origin: "*",
     methods: ["GET", "POST"],
   },
+});
+httpServer.on("request", (req, res) => {
+  if (req.url === "/") {
+    res.writeHead(200, { "Content-Type": "text/plain" });
+    res.end("API online");
+  }
 });
 
 // Sala global
