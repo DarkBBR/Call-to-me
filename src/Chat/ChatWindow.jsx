@@ -173,12 +173,15 @@ export default function ChatWindow() {
   }, []);
 
   return (
-    <div className="w-screen h-screen flex items-center justify-center bg-transparent">
-      <div className="flex flex-col w-full max-w-3xl h-[90vh] min-h-0 max-h-[90vh] bg-zinc-900 border border-green-800 shadow-xl rounded-[2.5rem] mx-auto overflow-hidden transition-all duration-300">
+    <div className="fixed inset-0 w-full h-[100dvh] bg-zinc-900 flex items-center justify-center overflow-hidden">
+      
+      <div className="flex flex-col w-full h-full max-w-3xl mx-auto bg-zinc-900 border border-green-800 shadow-xl rounded-none sm:rounded-[2.5rem] overflow-hidden transition-all duration-300">
         {/* Header */}
-        <ProfileHeader user={user} onSettings={() => setSettingsOpen(true)} />
+        <div className="sticky top-0 z-20">
+          <ProfileHeader user={user} onSettings={() => setSettingsOpen(true)} />
+        </div>
         {/* Mensagens */}
-        <div className="flex-1 min-h-0 overflow-y-auto p-2 sm:p-4 space-y-2 bg-zinc-900 custom-scrollbar">
+        <div className="flex-1 min-h-0 overflow-y-auto p-1 sm:p-4 space-y-1 sm:space-y-2 bg-zinc-900 custom-scrollbar">
           {messages.map((msg) => (
             <MessageBubble
               key={msg.id}
@@ -191,64 +194,66 @@ export default function ChatWindow() {
           <div ref={messagesEndRef} />
         </div>
         {/* Input */}
-        <form onSubmit={sendMessage} className="relative p-2 sm:p-4 bg-zinc-950 border-t border-green-800 flex gap-1 sm:gap-2 items-center w-full">
-          <button
-            type="button"
-            className="text-2xl px-2 text-green-400 hover:text-green-300 focus:outline-none"
-            onClick={() => setShowEmoji((v) => !v)}
-            tabIndex={-1}
-            aria-label="Abrir emojis"
-          >
-            😊
-          </button>
-          {showEmoji && (
-            <div ref={emojiPickerRef} className="fixed left-1/2 bottom-24 sm:bottom-32 -translate-x-1/2 z-50 w-[95vw] max-w-xs sm:max-w-sm md:max-w-md">
-              <EmojiPicker
-                onEmojiClick={(emojiData) => {
-                  setInput((prev) => prev + emojiData.emoji);
-                  setShowEmoji(false);
-                }}
-                theme={theme === "light" ? "light" : "dark"}
-                width="100%"
-                searchDisabled
-                skinTonesDisabled
-                previewConfig={{ showPreview: false }}
-              />
-            </div>
-          )}
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Digite sua mensagem..."
-            className="flex-1 p-2 rounded bg-zinc-800 text-white focus:outline-none focus:ring-2 focus:ring-green-500 border-2 border-transparent focus:border-green-400 transition-all duration-200 text-sm sm:text-base"
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) sendMessage(e);
-            }}
-          />
-          <button
-            type="button"
-            className="text-xl p-2 text-green-400 hover:text-green-300 focus:outline-none"
-            onClick={() => fileInputRef.current && fileInputRef.current.click()}
-            aria-label="Enviar imagem"
-          >
-            <FaImage />
-          </button>
-          <input
-            type="file"
-            accept="image/*"
-            ref={fileInputRef}
-            onChange={sendImage}
-            className="hidden"
-          />
-          <button
-            type="submit"
-            className="bg-green-600 hover:bg-green-700 text-white font-bold px-3 sm:px-4 py-2 rounded shadow transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-400"
-            aria-label="Enviar mensagem"
-          >
-            Enviar
-          </button>
-        </form>
+        <div className="sticky bottom-0 z-20 w-full bg-zinc-950 border-t border-green-800">
+          <form onSubmit={sendMessage} className="flex gap-2 items-center w-full p-2 sm:p-4">
+            <button
+              type="button"
+              className="text-2xl px-2 text-green-400 hover:text-green-300 focus:outline-none"
+              onClick={() => setShowEmoji((v) => !v)}
+              tabIndex={-1}
+              aria-label="Abrir emojis"
+            >
+              😊
+            </button>
+            {showEmoji && (
+              <div ref={emojiPickerRef} className="fixed left-1/2 bottom-24 sm:bottom-32 -translate-x-1/2 z-50 w-[95vw] max-w-xs sm:max-w-sm md:max-w-md">
+                <EmojiPicker
+                  onEmojiClick={(emojiData) => {
+                    setInput((prev) => prev + emojiData.emoji);
+                    setShowEmoji(false);
+                  }}
+                  theme={theme === "light" ? "light" : "dark"}
+                  width="100%"
+                  searchDisabled
+                  skinTonesDisabled
+                  previewConfig={{ showPreview: false }}
+                />
+              </div>
+            )}
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Digite sua mensagem..."
+              className="flex-1 p-2 rounded bg-zinc-800 text-white focus:outline-none focus:ring-2 focus:ring-green-500 border-2 border-transparent focus:border-green-400 transition-all duration-200 text-sm sm:text-base"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) sendMessage(e);
+              }}
+            />
+            <button
+              type="button"
+              className="text-xl p-2 text-green-400 hover:text-green-300 focus:outline-none"
+              onClick={() => fileInputRef.current && fileInputRef.current.click()}
+              aria-label="Enviar imagem"
+            >
+              <FaImage />
+            </button>
+            <input
+              type="file"
+              accept="image/*"
+              ref={fileInputRef}
+              onChange={sendImage}
+              className="hidden"
+            />
+            <button
+              type="submit"
+              className="bg-green-600 hover:bg-green-700 text-white font-bold px-3 sm:px-4 py-2 rounded shadow transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-400"
+              aria-label="Enviar mensagem"
+            >
+              Enviar
+            </button>
+          </form>
+        </div>
         <ProfileSettings
           open={settingsOpen}
           onClose={() => setSettingsOpen(false)}

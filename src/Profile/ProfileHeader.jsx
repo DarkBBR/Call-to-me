@@ -1,7 +1,9 @@
 import React from "react";
-import { FaCog } from "react-icons/fa";
+import { FaCog, FaSignOutAlt } from "react-icons/fa";
+import { useAuth } from "../context/AuthContext";
 
 export default function ProfileHeader({ user, onSettings }) {
+  const { logout } = useAuth();
   return (
     <div className="p-2 sm:p-4 border-b border-green-800 flex items-center justify-between bg-zinc-950 shadow-md rounded-t-lg">
       <div className="flex items-center gap-2 sm:gap-3">
@@ -16,9 +18,14 @@ export default function ProfileHeader({ user, onSettings }) {
           {user.displayName || user.name}
         </span>
       </div>
-      <button className="text-green-400 hover:text-green-300 p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-green-400" onClick={onSettings} title="Configurações">
-        <FaCog size={22} />
-      </button>
+      <div className="flex items-center gap-2">
+        <button className="text-green-400 hover:text-green-300 p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-green-400" onClick={onSettings} title="Configurações">
+          <FaCog size={22} />
+        </button>
+        <button className="text-red-400 hover:text-red-300 p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-red-400" onClick={logout} title="Sair da conta">
+          <FaSignOutAlt size={22} />
+        </button>
+      </div>
     </div>
   );
 } 

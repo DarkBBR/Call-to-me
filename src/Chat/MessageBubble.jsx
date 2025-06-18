@@ -20,14 +20,14 @@ export default function MessageBubble({ msg, isOwn, onReact, onEdit }) {
   };
 
   return (
-    <div className={`flex w-full py-2 ${isOwn ? "justify-end" : "justify-start"} items-end gap-2 sm:gap-4`}>
+    <div className={`flex w-full py-1 sm:py-2 ${isOwn ? "justify-end" : "justify-start"} items-end gap-1 sm:gap-4`}>
       {/* Avatar fora do balão */}
       {!isOwn && (
         <div className="flex-shrink-0">
           {msg.user.avatar ? (
-            <img src={msg.user.avatar} alt="avatar" className="w-10 h-10 rounded-full shadow-md border-2 border-zinc-800" />
+            <img src={msg.user.avatar} alt="avatar" className="w-8 h-8 sm:w-10 sm:h-10 rounded-full shadow-md border-2 border-zinc-800" />
           ) : (
-            <div className="w-10 h-10 rounded-full bg-green-700 flex items-center justify-center text-white font-bold text-lg shadow-md border-2 border-zinc-800">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-green-700 flex items-center justify-center text-white font-bold text-base sm:text-lg shadow-md border-2 border-zinc-800">
               {msg.user.displayName?.[0]?.toUpperCase() || msg.user.name[0].toUpperCase()}
             </div>
           )}
@@ -38,16 +38,16 @@ export default function MessageBubble({ msg, isOwn, onReact, onEdit }) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.22, type: "spring", bounce: 0.25 }}
         className={
-          `relative max-w-full sm:max-w-[80%] md:max-w-[60%] p-4 rounded-[2.5rem] shadow-xl flex flex-col group border transition-all duration-200 ` +
+          `relative max-w-[95%] sm:max-w-[80%] md:max-w-[60%] p-2 sm:p-4 rounded-[2.5rem] shadow-xl flex flex-col group border transition-all duration-200 ` +
           (isOwn
             ? "bg-gradient-to-br from-green-400/80 to-green-700/90 text-white rounded-br-3xl border-green-400 hover:shadow-green-400/40"
             : "bg-gradient-to-br from-zinc-700/80 to-zinc-900/90 text-green-100 rounded-bl-3xl border-zinc-600 hover:shadow-green-200/20"
           ) +
-          " hover:scale-[1.01] min-w-[120px]"
+          " hover:scale-[1.01] min-w-[80px]"
         }
         style={{ wordBreak: "break-word" }}
       >
-        <div className="text-xs font-bold flex items-center gap-1 mb-1">
+        <div className="text-xs sm:text-sm font-bold flex items-center gap-1 mb-1">
           {msg.user.displayName || msg.user.name}
           {isOwn && (
             <button
@@ -77,9 +77,9 @@ export default function MessageBubble({ msg, isOwn, onReact, onEdit }) {
         ) : msg.audio ? (
           <AudioPlayer src={msg.audio} />
         ) : msg.sticker ? (
-          <img src={msg.sticker} alt="sticker" className="w-32 h-32 max-w-full max-h-60 object-contain mt-1 rounded-xl shadow-md border border-zinc-700" loading="lazy" />
+          <img src={msg.sticker} alt="sticker" className="w-24 h-24 sm:w-32 sm:h-32 max-w-full max-h-40 sm:max-h-60 object-contain mt-1 rounded-xl shadow-md border border-zinc-700" loading="lazy" />
         ) : (
-          <div className="break-words whitespace-pre-line text-sm sm:text-base">{msg.text}</div>
+          <div className="break-words whitespace-pre-line text-base sm:text-lg">{msg.text}</div>
         )}
         <div
           className="text-[10px] text-green-200 mt-2 text-right cursor-pointer select-none relative"
@@ -98,9 +98,9 @@ export default function MessageBubble({ msg, isOwn, onReact, onEdit }) {
       {isOwn && (
         <div className="flex-shrink-0">
           {msg.user.avatar ? (
-            <img src={msg.user.avatar} alt="avatar" className="w-10 h-10 rounded-full shadow-md border-2 border-zinc-800" />
+            <img src={msg.user.avatar} alt="avatar" className="w-8 h-8 sm:w-10 sm:h-10 rounded-full shadow-md border-2 border-zinc-800" />
           ) : (
-            <div className="w-10 h-10 rounded-full bg-green-700 flex items-center justify-center text-white font-bold text-lg shadow-md border-2 border-zinc-800">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-green-700 flex items-center justify-center text-white font-bold text-base sm:text-lg shadow-md border-2 border-zinc-800">
               {msg.user.displayName?.[0]?.toUpperCase() || msg.user.name[0].toUpperCase()}
             </div>
           )}
