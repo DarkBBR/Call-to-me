@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { FaRegEdit } from "react-icons/fa";
+import { FaRegEdit, FaReply } from "react-icons/fa";
 import { BsEmojiSmile } from "react-icons/bs";
 import { motion } from "framer-motion";
 import AudioPlayer from "./AudioPlayer";
 
 const reactionsList = ["👍", "😂", "😍", "😮", "😢", "😡"];
 
-export default function MessageBubble({ msg, isOwn, onReact, onEdit }) {
+export default function MessageBubble({ msg, isOwn, onReact, onEdit, onReply }) {
   const [showReactions, setShowReactions] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editText, setEditText] = useState(msg.text);
@@ -58,10 +58,23 @@ export default function MessageBubble({ msg, isOwn, onReact, onEdit }) {
               <FaRegEdit />
             </button>
           )}
+          <button
+            className="ml-1 text-green-200 hover:text-green-100"
+            onClick={() => onReply && onReply(msg)}
+            title="Responder mensagem"
+          >
+            <FaReply />
+          </button>
           {msg.edited && (
             <span className="ml-2 text-[10px] text-yellow-200 italic">(editada)</span>
           )}
         </div>
+        {/* Resposta (reply) */}
+        {msg.replyTo && (
+          <div className="mb-2 px-3 py-1 bg-zinc-800/80 border-l-4 border-green-400 rounded-md text-xs text-green-200">
+            <span className="font-bold">{msg.replyTo.user.displayName || msg.replyTo.user.name}:</span> {msg.replyTo.text}
+          </div>
+        )}
         {editing ? (
           <input
             className="bg-zinc-700 text-white rounded p-1 mt-1 w-full border-2 border-green-400 focus:ring-2 focus:ring-green-400 outline-none transition-all duration-200"

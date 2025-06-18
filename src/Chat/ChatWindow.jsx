@@ -26,6 +26,7 @@ export default function ChatWindow() {
   const [showEmoji, setShowEmoji] = useState(false);
   const emojiPickerRef = useRef();
   const fileInputRef = useRef();
+  const [replyTo, setReplyTo] = useState(null);
 
   // Recebe mensagens do socket
   const socketRef = useSocket({
@@ -101,9 +102,15 @@ export default function ChatWindow() {
         avatar: user.avatar,
       },
       createdAt: new Date().toISOString(),
+      replyTo: replyTo ? {
+        id: replyTo.id,
+        text: replyTo.text,
+        user: replyTo.user,
+      } : undefined,
     };
     socketRef.current.emit("send_message", msg);
     setInput("");
+    setReplyTo(null);
     setShowEmoji(false);
   };
 
@@ -190,10 +197,19 @@ export default function ChatWindow() {
               isOwn={msg.user.name === user.name}
               onReact={(emoji) => reactMessage(msg.id, emoji)}
               onEdit={(newText) => editMessage(msg.id, newText)}
+              onReply={setReplyTo}
             />
           ))}
           <div ref={messagesEndRef} />
         </div>
+        {/* Preview de resposta */}
+        {replyTo && (
+          <div className="flex items-center gap-2 px-2 py-1 bg-zinc-800 border-l-4 border-green-500 rounded-t-lg text-xs sm:text-sm text-green-200">
+            <span className="font-bold">{replyTo.user.displayName || replyTo.user.name}:</span>
+            <span className="truncate">{replyTo.text}</span>
+            <button onClick={() => setReplyTo(null)} className="ml-auto text-red-400 hover:text-red-200 text-xs">Cancelar</button>
+          </div>
+        )}
         {/* Input */}
         <div className="sticky bottom-0 z-20 w-full bg-zinc-950 border-t border-green-800">
           <form onSubmit={sendMessage} className="flex gap-2 items-center w-full p-2 sm:p-4">
