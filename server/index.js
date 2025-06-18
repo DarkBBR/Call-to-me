@@ -1,14 +1,15 @@
 import { Server } from "socket.io";
 import { createServer } from "http";
 
-const PORT = "0.0.0.0";
+const PORT = 3001;
+const HOST = '0.0.0.0';
 
 const httpServer = createServer();
 const io = new Server(httpServer, {
   cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-  },
+    origin: "https://call-to-me.vercel.app/",
+    methods: ["GET", "POST"]
+  }
 });
 httpServer.on("request", (req, res) => {
   if (req.url === "/") {
@@ -59,6 +60,6 @@ io.on("connection", (socket) => {
   });
 });
 
-httpServer.listen(PORT, () => {
+httpServer.listen(PORT, HOST, () => {
   console.log(`Servidor Socket.io rodando na porta ${PORT}`);
 });
