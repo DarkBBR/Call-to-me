@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 
-const SOCKET_URL = "http://localhost:3001";
+const SOCKET_URL = "https://call-to-me.onrender.com";
 
 export function useSocket(onEvents = {}) {
   const socketRef = useRef();
