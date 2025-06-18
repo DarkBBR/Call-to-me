@@ -104,6 +104,7 @@ export default function ChatWindow() {
     };
     socketRef.current.emit("send_message", msg);
     setInput("");
+    setShowEmoji(false);
   };
 
   const sendAudio = (audioBase64) => {
