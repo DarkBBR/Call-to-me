@@ -4,6 +4,7 @@ import { useTheme } from "../context/ThemeContext";
 import { useNavigate } from "react-router-dom";
 import { FiArrowLeft, FiCamera, FiUser, FiPalette, FiBell, FiLogOut, FiTrash2, FiSave } from "react-icons/fi";
 import { motion } from "framer-motion";
+import { useSocket } from "../hooks/useSocket";
 
 export default function Settings() {
   const { user, logout, setUser } = useAuth();
@@ -15,22 +16,27 @@ export default function Settings() {
   const [pushNotification, setPushNotification] = useState(() => localStorage.getItem('convosphere_push_notification') === 'true');
   const navigate = useNavigate();
   const fileInputRef = useRef();
+  const socketRef = useSocket();
 
   const handleSave = () => {
     const users = JSON.parse(localStorage.getItem("chat_users") || "[]");
     const idx = users.findIndex(u => u.name === user.name);
+    const updatedUser = { ...user, displayName, avatar };
+    
     if (idx !== -1) {
-      users[idx].displayName = displayName;
-      users[idx].avatar = avatar;
+      users[idx] = updatedUser;
     } else {
-      users.push({ ...user, displayName, avatar });
+      users.push(updatedUser);
     }
     localStorage.setItem("chat_users", JSON.stringify(users));
-    setUser({ ...user, displayName, avatar });
+    setUser(updatedUser);
+    
+    socketRef.current?.emit('profile_updated', updatedUser);
+
     setSuccess("Perfil atualizado com sucesso!");
     setTimeout(() => {
       setSuccess("");
-      navigate(-1); // Volta para a página anterior (chat)
+      navigate(-1);
     }, 1200);
   };
 

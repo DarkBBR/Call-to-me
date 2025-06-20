@@ -24,22 +24,37 @@ export const useConversations = () => {
     const socketRef = useSocket({
         receive_message: (msg) => {
             if (!msg.roomId) return;
+            // Apenas adiciona a mensagem se ela não for do usuário atual
+            if (msg.user.name !== user.name) {
+                setConversations(prev => ({
+                    ...prev,
+                    [msg.roomId]: [...(prev[msg.roomId] || []), msg]
+                }));
+            }
+        },
+        message_delivered: ({ id, roomId }) => {
+            // Atualiza o status da mensagem para 'delivered'
             setConversations(prev => {
-                const roomMessages = prev[msg.roomId] || [];
-                // Se a mensagem já existe (confirmação do servidor), atualiza o status.
-                if (roomMessages.some(m => m.id === msg.id)) {
-                    return {
-                        ...prev,
-                        [msg.roomId]: roomMessages.map(m => m.id === msg.id ? { ...m, status: msg.status } : m)
-                    };
-                }
-                // Se for uma mensagem nova de outro usuário, adiciona.
+                const roomMessages = prev[roomId] || [];
                 return {
                     ...prev,
-                    [msg.roomId]: [...roomMessages, msg]
+                    [roomId]: roomMessages.map(m => m.id === id ? { ...m, status: 'delivered' } : m)
                 };
             });
         },
+        user_profile_updated: (updatedUser) => {
+            setAllUsers(prev => prev.map(u => u.name === updatedUser.name ? updatedUser : u));
+            const allLocalUsers = JSON.parse(localStorage.getItem(ALL_USERS_KEY) || "[]");
+            const newAllLocalUsers = allLocalUsers.map(u => u.name === updatedUser.name ? updatedUser : u);
+            localStorage.setItem(ALL_USERS_KEY, JSON.stringify(newAllLocalUsers));
+        },
+        user_connected: (newUser) => {
+             setAllUsers(prev => [...prev.filter(u => u.name !== newUser.name), newUser]);
+        },
+        user_disconnected: ({ name }) => {
+            // No futuro, podemos mudar o status para 'offline' em vez de remover
+            setAllUsers(prev => prev.filter(u => u.name !== name));
+        }
     });
 
     // Carregar usuários e conversas do localStorage

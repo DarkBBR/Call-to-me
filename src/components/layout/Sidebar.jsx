@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiPlusCircle, FiSearch, FiGlobe, FiSettings, FiMenu, FiX } from 'react-icons/fi';
+import { FiPlusCircle, FiGlobe, FiSettings, FiMenu, FiX, FiUsers, FiMessageSquare } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -23,8 +23,15 @@ const ConversationItem = ({ name, avatar, lastMessage, onClick, active }) => (
   </div>
 );
 
-export default function Sidebar({ dmConversations, onSelectConversation, activeConversationId, onSelectGlobalChat, onAddContact }) {
-  const { user, logout } = useAuth();
+const UserItem = ({ user, onClick }) => (
+    <div onClick={onClick} className="flex items-center p-3 rounded-lg cursor-pointer hover:bg-gray-700/50 transition-colors">
+        <img src={user.avatar || `https://ui-avatars.com/api/?name=${user.displayName}&background=random`} alt="Avatar" className="w-10 h-10 rounded-full object-cover mr-4"/>
+        <span className="font-semibold">{user.displayName}</span>
+    </div>
+);
+
+export default function Sidebar({ allUsers, dmConversations, onSelectConversation, activeConversationId, onSelectGlobalChat }) {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
@@ -40,7 +47,7 @@ export default function Sidebar({ dmConversations, onSelectConversation, activeC
         <FiMenu size={28} />
       </button>
       {/* Overlay e sidebar mobile */}
-      <div className={`fixed inset-0 z-40 bg-black/40 transition-opacity ${open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} md:hidden`} onClick={() => setOpen(false)} />
+      <div className={`fixed inset-0 z-40 bg-black/40 transition-opacity ${open ? 'opacity-100' : 'opacity-0 pointer-events-none'} md:hidden`} onClick={() => setOpen(false)} />
       <aside className={`fixed top-0 left-0 h-full w-72 bg-gray-800 flex flex-col border-r border-gray-700 z-50 transform transition-transform duration-300 md:static md:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'} md:w-80 lg:w-96`}>
         <div className="p-4 flex items-center justify-between border-b border-gray-700">
           <div className="flex items-center">
@@ -49,23 +56,12 @@ export default function Sidebar({ dmConversations, onSelectConversation, activeC
           </div>
           <div className="flex items-center gap-2">
             <button onClick={() => navigate('/settings')} className="text-gray-400 hover:text-green-400 text-xl" title="Configurações"><FiSettings /></button>
-            <button onClick={logout} className="text-gray-400 hover:text-white">Sair</button>
-            {/* Botão fechar só no mobile */}
             <button className="md:hidden ml-2 text-gray-400 hover:text-red-400" onClick={() => setOpen(false)} aria-label="Fechar menu"><FiX size={24} /></button>
           </div>
         </div>
-        <div className="p-4 border-b border-gray-700">
-          <div className="relative">
-            <FiSearch className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
-            <input 
-              type="text" 
-              placeholder="Pesquisar usuários"
-              className="w-full bg-gray-900 rounded-full py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-          </div>
-        </div>
         <div className="flex-1 overflow-y-auto p-2 space-y-1">
-          <h3 className="px-3 py-2 text-xs font-bold text-gray-400 uppercase">Conversas</h3>
+          {/* Seção de Conversas Ativas */}
+          <h3 className="px-3 py-2 text-xs font-bold text-gray-400 uppercase flex items-center gap-2"><FiMessageSquare/> Conversas</h3>
           <ConversationItem 
               name="Chat Global"
               avatar={'/globe.svg'}
@@ -73,7 +69,6 @@ export default function Sidebar({ dmConversations, onSelectConversation, activeC
               onClick={() => { onSelectGlobalChat(); setOpen(false); }}
               active={activeConversationId === 'global'}
           />
-          <h3 className="px-3 py-2 text-xs font-bold text-gray-400 uppercase mt-4">Mensagens Diretas</h3>
           {dmConversations.map(conv => (
             <ConversationItem 
               key={conv.id}
@@ -84,12 +79,16 @@ export default function Sidebar({ dmConversations, onSelectConversation, activeC
               active={activeConversationId === conv.id}
             />
           ))}
-        </div>
-        <div className="p-4 border-t border-gray-700">
-           <button onClick={onAddContact} className="flex items-center justify-center w-full gap-2 text-green-400 hover:text-green-300 font-semibold p-3 rounded-lg hover:bg-green-500/10 transition">
-              <FiPlusCircle />
-              <span>Nova Conversa</span>
-           </button>
+
+          {/* Seção de Usuários Online */}
+          <h3 className="px-3 py-2 text-xs font-bold text-gray-400 uppercase mt-4 flex items-center gap-2"><FiUsers/> Usuários</h3>
+          {allUsers.map(u => (
+            <UserItem 
+              key={u.name} 
+              user={u}
+              onClick={() => { onSelectConversation(u); setOpen(false); }}
+            />
+          ))}
         </div>
       </aside>
     </>

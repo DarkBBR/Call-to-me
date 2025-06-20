@@ -23,8 +23,8 @@ export function useSocket(events = {}) {
   }, [JSON.stringify(events)]);
 
   // Função para registrar o usuário
-  const registerUser = (userName) => {
-    socketRef.current?.emit('register_user', userName);
+  const registerUser = (user) => {
+    socketRef.current?.emit('register_user', user);
   };
 
   return Object.assign(socketRef, { registerUser });

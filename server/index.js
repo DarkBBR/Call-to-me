@@ -21,13 +21,28 @@ httpServer.on("request", (req, res) => {
 
 // Map de usuários conectados: { userName: socket.id }
 const userSockets = {};
+// Armazena o objeto de usuário completo para atualizações de perfil
+const connectedUsers = {};
 
 io.on("connection", (socket) => {
   let currentUser = null;
 
-  socket.on("register_user", (userName) => {
-    userSockets[userName] = socket.id;
-    currentUser = userName;
+  socket.on("register_user", (user) => {
+    if (!user || !user.name) return;
+    userSockets[user.name] = socket.id;
+    connectedUsers[user.name] = user;
+    currentUser = user.name;
+    // Notifica todos (exceto o próprio usuário) sobre o novo usuário online
+    socket.broadcast.emit('user_connected', user);
+  });
+
+  // Novo evento para lidar com atualização de perfil
+  socket.on("profile_updated", (user) => {
+    if (user && user.name) {
+      connectedUsers[user.name] = user;
+      // Notifica todos sobre a atualização do perfil
+      io.emit('user_profile_updated', user);
+    }
   });
 
   socket.on("join_room", (roomId) => {
@@ -37,10 +52,11 @@ io.on("connection", (socket) => {
 
   socket.on("send_message", (data) => {
     if (data.roomId) {
-      // Envia para todos na sala
-      io.to(data.roomId).emit("receive_message", { ...data, status: "delivered" });
-      // Notifica o remetente que a mensagem foi entregue
-      if (data.to && userSockets[data.user.name]) {
+      // Envia para todos na sala, EXCETO para o remetente
+      socket.to(data.roomId).emit("receive_message", { ...data, status: "delivered" });
+      
+      // Notifica o remetente que a mensagem foi entregue (para atualizar o status)
+      if (userSockets[data.user.name]) {
         io.to(userSockets[data.user.name]).emit("message_delivered", { id: data.id, roomId: data.roomId });
       }
     }
@@ -98,7 +114,12 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    if (currentUser) delete userSockets[currentUser];
+    if (currentUser) {
+      delete userSockets[currentUser];
+      delete connectedUsers[currentUser];
+      // Notifica todos que o usuário ficou offline
+      io.emit('user_disconnected', { name: currentUser });
+    }
     console.log("Usuário desconectado:", socket.id);
   });
 });
