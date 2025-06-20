@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiPlusCircle, FiGlobe, FiSettings, FiMenu, FiX, FiUsers, FiMessageSquare, FiUser, FiLogOut } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -31,28 +31,28 @@ const UserItem = ({ user, onClick }) => (
     </div>
 );
 
-function MenuBar({ onProfile, onSettings, onLogout }) {
+function MenuBar({ onChat, onContacts, onProfile, onSettings, onLogout, active }) {
   return (
-    <nav className="fixed bottom-0 left-0 w-full h-14 bg-gray-900 border-t border-gray-800 flex justify-around items-center z-40 md:static md:w-20 md:h-full md:flex-col md:justify-start md:gap-6 md:border-t-0 md:border-r">
-      <button className="flex flex-col items-center text-gray-400 hover:text-green-400 text-xl" title="Chat">
+    <nav className="fixed left-0 top-0 h-full w-16 bg-gray-900 border-r border-gray-800 flex flex-col items-center py-4 z-50 gap-4 md:gap-6">
+      <button onClick={onChat} className={`flex flex-col items-center text-xl ${active==='chat' ? 'text-green-400' : 'text-gray-400 hover:text-green-400'}`} title="Chat">
         <FiMessageSquare />
-        <span className="text-xs md:hidden">Chat</span>
+        <span className="text-[10px] mt-1">Chat</span>
       </button>
-      <button className="flex flex-col items-center text-gray-400 hover:text-green-400 text-xl" title="Contatos">
+      <button onClick={onContacts} className={`flex flex-col items-center text-xl ${active==='contacts' ? 'text-green-400' : 'text-gray-400 hover:text-green-400'}`} title="Contatos">
         <FiUsers />
-        <span className="text-xs md:hidden">Contatos</span>
+        <span className="text-[10px] mt-1">Contatos</span>
       </button>
-      <button onClick={onProfile} className="flex flex-col items-center text-gray-400 hover:text-green-400 text-xl" title="Perfil">
+      <button onClick={onProfile} className="flex flex-col items-center text-xl text-gray-400 hover:text-green-400" title="Perfil">
         <FiUser />
-        <span className="text-xs md:hidden">Perfil</span>
+        <span className="text-[10px] mt-1">Perfil</span>
       </button>
-      <button onClick={onSettings} className="flex flex-col items-center text-gray-400 hover:text-green-400 text-xl" title="Configurações">
+      <button onClick={onSettings} className="flex flex-col items-center text-xl text-gray-400 hover:text-green-400" title="Configurações">
         <FiSettings />
-        <span className="text-xs md:hidden">Config</span>
+        <span className="text-[10px] mt-1">Config</span>
       </button>
-      <button onClick={onLogout} className="flex flex-col items-center text-gray-400 hover:text-red-400 text-xl" title="Sair">
+      <button onClick={onLogout} className="flex flex-col items-center text-xl text-gray-400 hover:text-red-400" title="Sair">
         <FiLogOut />
-        <span className="text-xs md:hidden">Sair</span>
+        <span className="text-[10px] mt-1">Sair</span>
       </button>
     </nav>
   );
@@ -61,86 +61,74 @@ function MenuBar({ onProfile, onSettings, onLogout }) {
 export default function Sidebar({ allUsers, dmConversations, onSelectConversation, activeConversationId, onSelectGlobalChat }) {
   const { user, logout, setUser } = useAuth();
   const navigate = useNavigate();
-  const [open, setOpen] = useState(window.innerWidth >= 768); // Aberta por padrão no desktop
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [activeTab, setActiveTab] = useState('chat');
 
-  // Fechar sidebar ao clicar fora no mobile
-  React.useEffect(() => {
-    if (open && window.innerWidth < 768) {
+  // Fecha sidebar ao clicar fora (mobile)
+  useEffect(() => {
+    if (sidebarOpen && window.innerWidth < 768) {
       const handle = (e) => {
-        if (!e.target.closest('.sidebar-fixed')) setOpen(false);
+        if (!e.target.closest('.sidebar-slide')) setSidebarOpen(false);
       };
       document.addEventListener('mousedown', handle);
       return () => document.removeEventListener('mousedown', handle);
     }
-  }, [open]);
+  }, [sidebarOpen]);
 
-  // Atualizar estado ao redimensionar
-  React.useEffect(() => {
-    const handleResize = () => setOpen(window.innerWidth >= 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
+  // MenuBar sempre fixo à esquerda, Sidebar desliza à direita dele
   return (
     <>
-      {/* Botão menu sempre visível, mas fora da sidebar */}
-      <button
-        className="fixed top-4 left-4 z-50 bg-gray-900 p-2 rounded-full border border-green-400 text-green-400 shadow-lg md:top-6 md:left-6"
-        onClick={() => setOpen(o => !o)}
-        aria-label={open ? 'Fechar menu' : 'Abrir menu'}
-        style={{ pointerEvents: open && window.innerWidth < 768 ? 'none' : 'auto' }}
-      >
-        {open ? <FiX size={28} /> : <FiMenu size={28} />}
-      </button>
-      {/* Overlay escuro no mobile quando sidebar aberta */}
-      {open && window.innerWidth < 768 && (
-        <div className="fixed inset-0 z-40 bg-black/60 transition-opacity" />
-      )}
-      {/* Sidebar fixa no desktop, sobreposta no mobile */}
-      <aside className={`sidebar-fixed fixed top-0 left-0 h-full w-11/12 max-w-xs sm:w-72 bg-gray-800 flex flex-col border-r border-gray-700 z-50 transition-transform duration-300 ${open ? 'translate-x-0' : '-translate-x-[-110%]'} md:static md:translate-x-0 md:w-80 lg:w-96`} style={{maxHeight: '100dvh'}}>
-        <div className="md:sticky md:top-0 md:z-10">
-          <MenuBar
-            onProfile={() => setShowProfile(true)}
-            onSettings={() => navigate('/settings')}
-            onLogout={() => { logout(); navigate('/login'); }}
-          />
-        </div>
+      <MenuBar
+        onChat={() => { setActiveTab('chat'); setSidebarOpen(false); }}
+        onContacts={() => { setActiveTab('contacts'); setSidebarOpen(true); }}
+        onProfile={() => setShowProfile(true)}
+        onSettings={() => navigate('/settings')}
+        onLogout={() => { logout(); navigate('/login'); }}
+        active={activeTab}
+      />
+      {/* Sidebar desliza à direita do MenuBar (desktop) ou cobre a tela (mobile) */}
+      <aside className={`sidebar-slide fixed top-0 left-16 h-full w-11/12 max-w-xs sm:w-72 bg-gray-800 flex flex-col border-r border-gray-700 z-40 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-[-110%]'} md:static md:left-16 md:w-80 lg:w-96 md:translate-x-0`} style={{maxHeight: '100dvh'}}>
         <div className="p-3 sm:p-4 flex items-center justify-between border-b border-gray-700">
           <div className="flex items-center">
             <img src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.displayName}&background=random`} alt="avatar" className="h-9 w-9 sm:h-10 sm:w-10 rounded-full object-cover mr-2 sm:mr-3 border-2 border-green-400 shadow" />
             <h2 className="font-bold text-lg sm:text-xl truncate max-w-[120px] sm:max-w-xs">{user?.displayName}</h2>
           </div>
+          <button className="md:hidden ml-1 text-gray-400 hover:text-red-400" onClick={() => setSidebarOpen(false)} aria-label="Fechar menu"><FiX size={24} /></button>
         </div>
-        <div className="flex-1 overflow-y-auto p-1 sm:p-2 space-y-1 custom-scrollbar" style={{maxHeight: 'calc(100dvh - 120px)'}}>
+        <div className="flex-1 overflow-y-auto p-1 sm:p-2 space-y-1 custom-scrollbar" style={{maxHeight: 'calc(100dvh - 64px)'}}>
           {/* Seção de Conversas Ativas */}
-          <h3 className="px-2 sm:px-3 py-2 text-xs font-bold text-gray-400 uppercase flex items-center gap-2"><FiMessageSquare/> Conversas</h3>
-          <ConversationItem 
-              name="Chat Global"
-              avatar={'/globe.svg'}
-              lastMessage="Converse com todos os usuários"
-              onClick={() => { onSelectGlobalChat(); setOpen(false); }}
-              active={activeConversationId === 'global'}
-          />
-          {(dmConversations || []).map(conv => (
+          {activeTab === 'chat' && <>
+            <h3 className="px-2 sm:px-3 py-2 text-xs font-bold text-gray-400 uppercase flex items-center gap-2"><FiMessageSquare/> Conversas</h3>
             <ConversationItem 
-              key={conv.id}
-              name={conv.user.displayName}
-              avatar={conv.user.avatar || `https://ui-avatars.com/api/?name=${conv.user.displayName}&background=random`}
-              lastMessage={conv.lastMessage}
-              onClick={() => { onSelectConversation(conv.user); setOpen(false); }}
-              active={activeConversationId === conv.id}
+                name="Chat Global"
+                avatar={'/globe.svg'}
+                lastMessage="Converse com todos os usuários"
+                onClick={() => { onSelectGlobalChat(); setSidebarOpen(false); }}
+                active={activeConversationId === 'global'}
             />
-          ))}
+            {(dmConversations || []).map(conv => (
+              <ConversationItem 
+                key={conv.id}
+                name={conv.user.displayName}
+                avatar={conv.user.avatar || `https://ui-avatars.com/api/?name=${conv.user.displayName}&background=random`}
+                lastMessage={conv.lastMessage}
+                onClick={() => { onSelectConversation(conv.user); setSidebarOpen(false); }}
+                active={activeConversationId === conv.id}
+              />
+            ))}
+          </>}
           {/* Seção de Usuários Online */}
-          <h3 className="px-2 sm:px-3 py-2 text-xs font-bold text-gray-400 uppercase mt-3 sm:mt-4 flex items-center gap-2"><FiUsers/> Usuários</h3>
-          {(allUsers || []).map(u => (
-            <UserItem 
-              key={u.name} 
-              user={u}
-              onClick={() => { onSelectConversation(u); setOpen(false); }}
-            />
-          ))}
+          {activeTab === 'contacts' && <>
+            <h3 className="px-2 sm:px-3 py-2 text-xs font-bold text-gray-400 uppercase mt-3 sm:mt-4 flex items-center gap-2"><FiUsers/> Usuários</h3>
+            {(allUsers || []).map(u => (
+              <UserItem 
+                key={u.name} 
+                user={u}
+                onClick={() => { onSelectConversation(u); setSidebarOpen(false); }}
+              />
+            ))}
+          </>}
         </div>
       </aside>
       {showProfile && (
