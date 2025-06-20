@@ -1,28 +1,31 @@
 import { useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 
-const SOCKET_URL = "https://call-to-me.onrender.com";
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
 
-export function useSocket(onEvents = {}) {
+export function useSocket(events = {}) {
   const socketRef = useRef();
 
   useEffect(() => {
-    socketRef.current = io(SOCKET_URL, { transports: ["websocket"] });
-
-    // Registrar eventos recebidos
-    Object.entries(onEvents).forEach(([event, handler]) => {
-      socketRef.current.on(event, handler);
+    if (!socketRef.current) {
+      socketRef.current = io(SOCKET_URL, { transports: ["websocket"] });
+    }
+    const socket = socketRef.current;
+    Object.entries(events).forEach(([event, handler]) => {
+      socket.on(event, handler);
     });
-
     return () => {
       // Limpar eventos ao desmontar
-      Object.entries(onEvents).forEach(([event, handler]) => {
-        socketRef.current.off(event, handler);
+      Object.entries(events).forEach(([event, handler]) => {
+        socket.off(event, handler);
       });
-      socketRef.current.disconnect();
     };
-    // eslint-disable-next-line
-  }, []);
+  }, [JSON.stringify(events)]);
 
-  return socketRef;
+  // Função para registrar o usuário
+  const registerUser = (userName) => {
+    socketRef.current?.emit('register_user', userName);
+  };
+
+  return Object.assign(socketRef, { registerUser });
 } 

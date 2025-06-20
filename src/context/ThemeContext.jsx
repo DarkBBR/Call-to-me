@@ -1,18 +1,19 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 export const themes = [
-  { name: "Preto/Verde", value: "dark-green" },
-  { name: "Claro", value: "light" },
-  { name: "Azul", value: "blue" },
-  { name: "Roxo", value: "purple" },
-  { name: "Vermelho", value: "red" },
-  { name: "Amarelo", value: "yellow" },
+  { name: "Preto e verde", value: "dark" },
+  { name: "Branco e roxo", value: "light" },
+  { name: "Roxo e preto", value: "purple-dark" },
+  { name: "Amarelo e vermelho", value: "yellow-red" },
+  { name: "Rosa e preto", value: "pink-dark" },
+  { name: "Rosa total com sombras", value: "pink" },
+  { name: "Preto com sombras e efeitos", value: "dark-shadow" },
 ];
 
 const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(() => localStorage.getItem("chat_theme") || "dark-green");
+  const [theme, setTheme] = useState(() => localStorage.getItem("chat_theme") || "dark");
 
   useEffect(() => {
     localStorage.setItem("chat_theme", theme);

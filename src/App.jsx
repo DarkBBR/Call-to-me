@@ -1,16 +1,7 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import { useAuth } from "./context/AuthContext";
-import Login from "./Auth/Login";
-import ChatWindow from "./Chat/ChatWindow";
+import { Outlet } from "react-router-dom";
 
 function App() {
-  const { user } = useAuth();
-
-  if (!user) return <Login />;
-
-  return <ChatWindow />;
+  return <Outlet />;
 }
 
-export default App
+export default App;
