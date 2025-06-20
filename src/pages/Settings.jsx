@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useNavigate } from "react-router-dom";
-import { FiArrowLeft, FiCamera, FiUser, FiPalette, FiBell, FiLogOut, FiTrash2, FiSave } from "react-icons/fi";
+import { FiArrowLeft, FiCamera, FiUser, FiSliders, FiBell, FiLogOut, FiTrash2, FiSave } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { useSocket } from "../hooks/useSocket";
 
@@ -114,7 +114,7 @@ export default function Settings() {
 
           {/* --- Seção de Preferências --- */}
           <section className="bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-700 mt-8">
-            <h2 className="text-xl font-semibold mb-6 flex items-center gap-2 text-green-400"><FiPalette /> Aparência e Notificações</h2>
+            <h2 className="text-xl font-semibold mb-6 flex items-center gap-2 text-green-400"><FiSliders /> Aparência e Notificações</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Tema */}
               <div>
