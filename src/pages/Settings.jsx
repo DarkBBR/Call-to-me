@@ -6,6 +6,19 @@ import { FiArrowLeft, FiCamera, FiUser, FiSliders, FiBell, FiLogOut, FiTrash2, F
 import { motion } from "framer-motion";
 import { useSocket } from "../hooks/useSocket";
 
+const randomAvatars = [
+  "https://i.pravatar.cc/150?img=1",
+  "https://i.pravatar.cc/150?img=2",
+  "https://i.pravatar.cc/150?img=3",
+  "https://i.pravatar.cc/150?img=4",
+  "https://i.pravatar.cc/150?img=5",
+  "https://i.pravatar.cc/150?img=6",
+  "https://i.pravatar.cc/150?img=7",
+  "https://i.pravatar.cc/150?img=8",
+  "https://i.pravatar.cc/150?img=9",
+  "https://i.pravatar.cc/150?img=10"
+];
+
 export default function Settings() {
   const { user, logout, setUser } = useAuth();
   const { theme, setTheme, themes } = useTheme();
@@ -67,27 +80,31 @@ export default function Settings() {
     localStorage.setItem('convosphere_push_notification', e.target.checked);
   };
 
-  return (
-    <div className="min-h-screen w-full bg-gray-900 text-white p-4 sm:p-6 lg:p-8">
-      <div className="max-w-4xl mx-auto">
-        <header className="flex items-center gap-4 mb-8">
-          <button onClick={() => navigate(-1)} className="text-green-400 hover:text-green-300">
-            <FiArrowLeft size={28} />
-          </button>
-          <h1 className="text-3xl font-bold">Configurações</h1>
-        </header>
+  const handleRandomProfile = () => {
+    setAvatar(randomAvatars[Math.floor(Math.random() * randomAvatars.length)]);
+  };
 
+  return (
+    <div className="min-h-screen w-full bg-gray-900 text-white p-2 sm:p-4 md:p-6 lg:p-8">
+      <div className="max-w-4xl mx-auto">
+        <header className="flex items-center gap-2 sm:gap-4 mb-6 sm:mb-8">
+          <button onClick={() => navigate(-1)} className="text-green-400 hover:text-green-300">
+            <FiArrowLeft size={24} className="sm:hidden" />
+            <FiArrowLeft size={28} className="hidden sm:inline" />
+          </button>
+          <h1 className="text-2xl sm:text-3xl font-bold">Configurações</h1>
+        </header>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
           {/* --- Seção de Perfil --- */}
-          <section className="bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-700">
-            <h2 className="text-xl font-semibold mb-6 flex items-center gap-2 text-green-400"><FiUser /> Perfil</h2>
-            <div className="flex flex-col md:flex-row items-center gap-6">
+          <section className="bg-gray-800 p-4 sm:p-6 rounded-2xl shadow-lg border border-gray-700">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 flex items-center gap-2 text-green-400"><FiUser /> Perfil</h2>
+            <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6 w-full">
               {/* Avatar */}
               <div className="relative group flex-shrink-0">
                 <img
                   src={avatar || `https://ui-avatars.com/api/?name=${displayName}&background=random`}
                   alt="Avatar"
-                  className="w-24 h-24 rounded-full object-cover border-4 border-gray-700 group-hover:border-green-500 transition-all duration-300"
+                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-4 border-gray-700 group-hover:border-green-500 transition-all duration-300"
                 />
                 <button
                   onClick={() => fileInputRef.current.click()}
@@ -97,9 +114,16 @@ export default function Settings() {
                   <FiCamera />
                 </button>
                 <input type="file" accept="image/*" ref={fileInputRef} onChange={handleAvatarChange} className="hidden" />
+                <button
+                  onClick={handleRandomProfile}
+                  className="mt-2 sm:mt-3 w-full bg-gray-700 hover:bg-green-700 text-white text-xs px-2 sm:px-3 py-1 rounded transition md:absolute md:top-0 md:left-full md:ml-4 md:mt-0"
+                  type="button"
+                >
+                  Gerar avatar aleatório
+                </button>
               </div>
               {/* Nome */}
-              <div className="w-full">
+              <div className="w-full mt-3 sm:mt-4 md:mt-0">
                 <label htmlFor="displayName" className="block text-sm font-medium mb-1">Nome de Exibição</label>
                 <input
                   id="displayName"
@@ -120,7 +144,13 @@ export default function Settings() {
               <div>
                 <label htmlFor="theme" className="block text-sm font-medium mb-1">Tema</label>
                 <select id="theme" value={theme} onChange={(e) => setTheme(e.target.value)} className="w-full p-3 rounded-lg bg-gray-900 border border-gray-700 text-white">
-                  {themes.map(t => <option key={t.value} value={t.value}>{t.name}</option>)}
+                  {themes.map(t => (
+                    <option key={t.value} value={t.value}>
+                      {t.name}
+                      {t.value.includes('gradient') ? ' 🌈' : ''}
+                      {t.value === 'animated-bg' ? ' ✨' : ''}
+                    </option>
+                  ))}
                 </select>
               </div>
               {/* Notificações */}
@@ -151,10 +181,10 @@ export default function Settings() {
           </section>
 
           {/* Botão Salvar Fixo */}
-          <div className="mt-8 text-center">
+          <div className="mt-8 text-center sticky bottom-0 bg-gray-900/80 py-4 z-30 w-full rounded-b-2xl shadow-lg">
             <button
                 onClick={handleSave}
-                className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg transition shadow-lg hover:shadow-green-500/30 flex items-center justify-center gap-2 mx-auto"
+                className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg transition shadow-lg hover:shadow-green-500/30 flex items-center justify-center gap-2 mx-auto w-full max-w-xs"
             >
                 <FiSave /> Salvar Alterações
             </button>

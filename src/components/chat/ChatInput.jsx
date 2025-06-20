@@ -100,7 +100,7 @@ export default function ChatInput({ onSendMessage, onSendAudio, onSendFile, onTy
           <button onClick={handleSendImage} className="mt-2 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition w-full">Enviar</button>
         </div>
       )}
-      <form onSubmit={handleSendMessage} className="flex items-center gap-4">
+      <form onSubmit={handleSendMessage} className="flex items-center gap-2 sm:gap-4 flex-wrap md:flex-nowrap">
         <button type="button" onClick={() => setShowEmoji(v => !v)} className="text-gray-400 hover:text-green-400 text-2xl">
           <FiSmile />
         </button>
@@ -136,7 +136,7 @@ export default function ChatInput({ onSendMessage, onSendAudio, onSendFile, onTy
           value={input}
           onChange={handleChange}
           placeholder="Digite uma mensagem..."
-          className="flex-1 bg-gray-900 rounded-full py-3 px-5 focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="flex-1 bg-gray-900 rounded-full py-2 sm:py-3 px-4 sm:px-5 focus:outline-none focus:ring-2 focus:ring-green-500 min-w-[120px]"
           disabled={!!imagePreview}
         />
         {input && !imagePreview && (

@@ -29,6 +29,21 @@ export const useConversations = () => {
                     ...prev,
                     [msg.roomId]: [...(prev[msg.roomId] || []), msg]
                 }));
+                // Tocar som de notificação se ativado
+                if (localStorage.getItem('convosphere_notification_sound') === 'true') {
+                    try {
+                        const audio = new Audio(require('../audios/notification.mp3'));
+                        audio.volume = 0.7;
+                        audio.play();
+                    } catch (e) {
+                        // fallback para import estático se necessário
+                        import('../audios/notification.mp3').then(mod => {
+                            const audio = new Audio(mod.default);
+                            audio.volume = 0.7;
+                            audio.play();
+                        }).catch(() => {});
+                    }
+                }
             }
         },
         message_delivered: ({ id, roomId }) => {

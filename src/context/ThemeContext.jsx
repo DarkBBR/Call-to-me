@@ -8,6 +8,10 @@ export const themes = [
   { name: "Rosa e preto", value: "pink-dark" },
   { name: "Rosa total com sombras", value: "pink" },
   { name: "Preto com sombras e efeitos", value: "dark-shadow" },
+  // Exemplos de temas visuais mais ricos:
+  { name: "Gradiente Roxo", value: "gradient-purple" },
+  { name: "Gradiente Azul", value: "gradient-blue" },
+  { name: "Fundo Animado", value: "animated-bg" },
 ];
 
 const ThemeContext = createContext();
@@ -18,6 +22,15 @@ export function ThemeProvider({ children }) {
   useEffect(() => {
     localStorage.setItem("chat_theme", theme);
     document.documentElement.setAttribute("data-theme", theme);
+    // Temas visuais especiais
+    document.body.classList.remove("theme-gradient-purple", "theme-gradient-blue", "theme-animated-bg");
+    if (theme === "gradient-purple") {
+      document.body.classList.add("theme-gradient-purple");
+    } else if (theme === "gradient-blue") {
+      document.body.classList.add("theme-gradient-blue");
+    } else if (theme === "animated-bg") {
+      document.body.classList.add("theme-animated-bg");
+    }
   }, [theme]);
 
   return (

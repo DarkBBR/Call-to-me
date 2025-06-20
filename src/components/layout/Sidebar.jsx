@@ -48,20 +48,20 @@ export default function Sidebar({ allUsers, dmConversations, onSelectConversatio
       </button>
       {/* Overlay e sidebar mobile */}
       <div className={`fixed inset-0 z-40 bg-black/40 transition-opacity ${open ? 'opacity-100' : 'opacity-0 pointer-events-none'} md:hidden`} onClick={() => setOpen(false)} />
-      <aside className={`fixed top-0 left-0 h-full w-72 bg-gray-800 flex flex-col border-r border-gray-700 z-50 transform transition-transform duration-300 md:static md:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'} md:w-80 lg:w-96`}>
-        <div className="p-4 flex items-center justify-between border-b border-gray-700">
+      <aside className={`fixed top-0 left-0 h-full w-11/12 max-w-xs sm:w-72 bg-gray-800 flex flex-col border-r border-gray-700 z-50 transform transition-transform duration-300 md:static md:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'} md:w-80 lg:w-96`}>
+        <div className="p-3 sm:p-4 flex items-center justify-between border-b border-gray-700">
           <div className="flex items-center">
-            <img src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.displayName}&background=random`} alt="avatar" className="h-10 w-10 rounded-full object-cover mr-3 border-2 border-green-400 shadow" />
-            <h2 className="font-bold text-xl">{user?.displayName}</h2>
+            <img src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.displayName}&background=random`} alt="avatar" className="h-9 w-9 sm:h-10 sm:w-10 rounded-full object-cover mr-2 sm:mr-3 border-2 border-green-400 shadow" />
+            <h2 className="font-bold text-lg sm:text-xl truncate max-w-[120px] sm:max-w-xs">{user?.displayName}</h2>
           </div>
-          <div className="flex items-center gap-2">
-            <button onClick={() => navigate('/settings')} className="text-gray-400 hover:text-green-400 text-xl" title="Configurações"><FiSettings /></button>
-            <button className="md:hidden ml-2 text-gray-400 hover:text-red-400" onClick={() => setOpen(false)} aria-label="Fechar menu"><FiX size={24} /></button>
+          <div className="flex items-center gap-1 sm:gap-2">
+            <button onClick={() => navigate('/settings')} className="text-gray-400 hover:text-green-400 text-lg sm:text-xl" title="Configurações"><FiSettings /></button>
+            <button className="md:hidden ml-1 sm:ml-2 text-gray-400 hover:text-red-400" onClick={() => setOpen(false)} aria-label="Fechar menu"><FiX size={22} className="sm:hidden" /><FiX size={24} className="hidden sm:inline" /></button>
           </div>
         </div>
-        <div className="flex-1 overflow-y-auto p-2 space-y-1">
+        <div className="flex-1 overflow-y-auto p-1 sm:p-2 space-y-1 custom-scrollbar">
           {/* Seção de Conversas Ativas */}
-          <h3 className="px-3 py-2 text-xs font-bold text-gray-400 uppercase flex items-center gap-2"><FiMessageSquare/> Conversas</h3>
+          <h3 className="px-2 sm:px-3 py-2 text-xs font-bold text-gray-400 uppercase flex items-center gap-2"><FiMessageSquare/> Conversas</h3>
           <ConversationItem 
               name="Chat Global"
               avatar={'/globe.svg'}
@@ -81,7 +81,7 @@ export default function Sidebar({ allUsers, dmConversations, onSelectConversatio
           ))}
 
           {/* Seção de Usuários Online */}
-          <h3 className="px-3 py-2 text-xs font-bold text-gray-400 uppercase mt-4 flex items-center gap-2"><FiUsers/> Usuários</h3>
+          <h3 className="px-2 sm:px-3 py-2 text-xs font-bold text-gray-400 uppercase mt-3 sm:mt-4 flex items-center gap-2"><FiUsers/> Usuários</h3>
           {(allUsers || []).map(u => (
             <UserItem 
               key={u.name} 
