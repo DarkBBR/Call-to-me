@@ -4,6 +4,7 @@ import MessageBubble from "../components/chat/MessageBubble";
 import Sidebar from "../components/layout/Sidebar";
 import ChatHeader from "../components/chat/ChatHeader";
 import ChatInput from "../components/chat/ChatInput";
+import AddContactModal from "../components/layout/AddContactModal";
 import { useConversations } from "../hooks/useConversations";
 import { useSocket } from "../hooks/useSocket";
 
@@ -13,11 +14,16 @@ export default function Chat() {
   const [typingUser, setTypingUser] = useState(null);
   const [readIds, setReadIds] = useState([]);
   const [search, setSearch] = useState("");
+  const [editingMsgId, setEditingMsgId] = useState(null);
+  const [editingText, setEditingText] = useState("");
+  const [replyToMsg, setReplyToMsg] = useState(null);
+  const [isAddContactModalOpen, setAddContactModalOpen] = useState(false);
 
   const {
     allUsers,
     activeConversation,
     activeConversationMessages,
+    dmConversations,
     selectConversation,
     sendMessage,
     setActiveConversation,
@@ -74,11 +80,6 @@ export default function Chat() {
   };
   const handleSendAudio = () => alert("Envio de áudio disponível apenas em dispositivos mobile!");
 
-  // Estados para edição e reply
-  const [editingMsgId, setEditingMsgId] = useState(null);
-  const [editingText, setEditingText] = useState("");
-  const [replyToMsg, setReplyToMsg] = useState(null);
-
   // Funções de ação
   const handleEdit = (msg) => {
     setEditingMsgId(msg.id);
@@ -106,13 +107,19 @@ export default function Chat() {
     }
   };
 
+  const handleSelectUserFromModal = (selectedUser) => {
+    selectConversation(selectedUser);
+    setAddContactModalOpen(false);
+  };
+
   return (
     <div className="flex h-screen w-screen bg-gray-900 text-white">
-      <Sidebar 
-        allUsers={allUsers}
+      <Sidebar
+        dmConversations={dmConversations}
         onSelectConversation={selectConversation}
         activeConversationId={activeConversation.id}
         onSelectGlobalChat={() => setActiveConversation({ id: 'global', name: 'Chat Global', avatar: '🌐' })}
+        onAddContact={() => setAddContactModalOpen(true)}
       />
       <div className="flex flex-col flex-1">
         <ChatHeader 
@@ -166,6 +173,14 @@ export default function Chat() {
           </div>
         )}
       </div>
+
+      {isAddContactModalOpen && (
+        <AddContactModal
+          users={allUsers}
+          onClose={() => setAddContactModalOpen(false)}
+          onSelectUser={handleSelectUserFromModal}
+        />
+      )}
     </div>
   );
 }

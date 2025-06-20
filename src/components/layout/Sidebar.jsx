@@ -3,27 +3,27 @@ import { FiPlusCircle, FiSearch, FiGlobe, FiSettings, FiMenu, FiX } from 'react-
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-const ConversationItem = ({ name, avatar, onClick, active }) => (
-  <div 
+const ConversationItem = ({ name, avatar, lastMessage, onClick, active }) => (
+  <div
     onClick={onClick}
     className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors ${active ? 'bg-green-600/30' : 'hover:bg-gray-700/50'}`}
   >
-    <div className="flex items-center justify-center h-12 w-12 rounded-full bg-gray-600 text-xl mr-4 flex-shrink-0">
-      {avatar}
+    <div className="relative mr-4 flex-shrink-0">
+      <img
+        src={avatar}
+        alt="Avatar"
+        className="w-12 h-12 rounded-full object-cover"
+      />
+      {/* Pode adicionar um indicador de online aqui se quiser */}
     </div>
     <div className="flex-1 overflow-hidden">
       <h3 className="font-bold truncate">{name}</h3>
-      {/* <p className="text-sm text-gray-400 truncate">{lastMessage}</p> */}
+      <p className="text-sm text-gray-400 truncate">{lastMessage}</p>
     </div>
-    {/* {unread > 0 && (
-      <div className="flex items-center justify-center h-6 w-6 bg-green-500 text-white text-xs rounded-full ml-2">
-        {unread}
-      </div>
-    )} */}
   </div>
 );
 
-export default function Sidebar({ allUsers, onSelectConversation, activeConversationId, onSelectGlobalChat }) {
+export default function Sidebar({ dmConversations, onSelectConversation, activeConversationId, onSelectGlobalChat, onAddContact }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -44,19 +44,11 @@ export default function Sidebar({ allUsers, onSelectConversation, activeConversa
       <aside className={`fixed top-0 left-0 h-full w-72 bg-gray-800 flex flex-col border-r border-gray-700 z-50 transform transition-transform duration-300 md:static md:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'} md:w-80 lg:w-96`}>
         <div className="p-4 flex items-center justify-between border-b border-gray-700">
           <div className="flex items-center">
-            {user?.avatar ? (
-              <img src={user.avatar} alt="avatar" className="h-10 w-10 rounded-full object-cover mr-3 border-2 border-green-400 shadow" />
-            ) : (
-              <div className="h-10 w-10 rounded-full bg-green-500 mr-3 flex items-center justify-center font-bold">
-                {user?.displayName?.charAt(0).toUpperCase()}
-              </div>
-            )}
+            <img src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.displayName}&background=random`} alt="avatar" className="h-10 w-10 rounded-full object-cover mr-3 border-2 border-green-400 shadow" />
             <h2 className="font-bold text-xl">{user?.displayName}</h2>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => navigate('/settings')} className="text-gray-400 hover:text-green-400 text-xl" title="Configurações">
-              <FiSettings />
-            </button>
+            <button onClick={() => navigate('/settings')} className="text-gray-400 hover:text-green-400 text-xl" title="Configurações"><FiSettings /></button>
             <button onClick={logout} className="text-gray-400 hover:text-white">Sair</button>
             {/* Botão fechar só no mobile */}
             <button className="md:hidden ml-2 text-gray-400 hover:text-red-400" onClick={() => setOpen(false)} aria-label="Fechar menu"><FiX size={24} /></button>
@@ -76,25 +68,27 @@ export default function Sidebar({ allUsers, onSelectConversation, activeConversa
           <h3 className="px-3 py-2 text-xs font-bold text-gray-400 uppercase">Conversas</h3>
           <ConversationItem 
               name="Chat Global"
-              avatar={<FiGlobe/>}
+              avatar={'/globe.svg'}
+              lastMessage="Converse com todos os usuários"
               onClick={() => { onSelectGlobalChat(); setOpen(false); }}
               active={activeConversationId === 'global'}
           />
-          <h3 className="px-3 py-2 text-xs font-bold text-gray-400 uppercase mt-4">Usuários</h3>
-          {allUsers.map(u => (
+          <h3 className="px-3 py-2 text-xs font-bold text-gray-400 uppercase mt-4">Mensagens Diretas</h3>
+          {dmConversations.map(conv => (
             <ConversationItem 
-              key={u.name} 
-              name={u.displayName}
-              avatar={u.displayName.charAt(0).toUpperCase()}
-              onClick={() => { onSelectConversation(u); setOpen(false); }}
-              active={activeConversationId.includes(u.name)}
+              key={conv.id}
+              name={conv.user.displayName}
+              avatar={conv.user.avatar || `https://ui-avatars.com/api/?name=${conv.user.displayName}&background=random`}
+              lastMessage={conv.lastMessage}
+              onClick={() => { onSelectConversation(conv.user); setOpen(false); }}
+              active={activeConversationId === conv.id}
             />
           ))}
         </div>
         <div className="p-4 border-t border-gray-700">
-           <button className="flex items-center justify-center w-full gap-2 text-green-400 hover:text-green-300">
+           <button onClick={onAddContact} className="flex items-center justify-center w-full gap-2 text-green-400 hover:text-green-300 font-semibold p-3 rounded-lg hover:bg-green-500/10 transition">
               <FiPlusCircle />
-              <span>Adicionar Contato</span>
+              <span>Nova Conversa</span>
            </button>
         </div>
       </aside>

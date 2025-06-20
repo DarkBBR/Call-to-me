@@ -24,10 +24,21 @@ export const useConversations = () => {
     const socketRef = useSocket({
         receive_message: (msg) => {
             if (!msg.roomId) return;
-            setConversations(prev => ({
-                ...prev,
-                [msg.roomId]: [...(prev[msg.roomId] || []), msg]
-            }));
+            setConversations(prev => {
+                const roomMessages = prev[msg.roomId] || [];
+                // Se a mensagem já existe (confirmação do servidor), atualiza o status.
+                if (roomMessages.some(m => m.id === msg.id)) {
+                    return {
+                        ...prev,
+                        [msg.roomId]: roomMessages.map(m => m.id === msg.id ? { ...m, status: msg.status } : m)
+                    };
+                }
+                // Se for uma mensagem nova de outro usuário, adiciona.
+                return {
+                    ...prev,
+                    [msg.roomId]: [...roomMessages, msg]
+                };
+            });
         },
     });
 
@@ -94,6 +105,20 @@ export const useConversations = () => {
     
     const activeConversationMessages = conversations[activeConversation.id] || [];
 
+    // Deriva a lista de conversas de DM a partir do objeto de conversas
+    const dmConversations = Object.keys(conversations)
+        .filter(roomId => roomId !== 'global')
+        .map(roomId => {
+            const otherUserName = roomId.split('--').find(name => name !== user.name);
+            const otherUser = allUsers.find(u => u.name === otherUserName) || { name: otherUserName, displayName: otherUserName };
+            const lastMessage = conversations[roomId].slice(-1)[0];
+            return {
+                id: roomId,
+                user: otherUser,
+                lastMessage: lastMessage?.text || lastMessage?.image ? (lastMessage.image ? '📷 Imagem' : lastMessage.text) : 'Nenhuma mensagem ainda'
+            };
+        });
+
     // Editar mensagem
     const editMessage = (msgId, newText) => {
         setConversations(prev => {
@@ -148,6 +173,7 @@ export const useConversations = () => {
         allUsers,
         activeConversation,
         activeConversationMessages,
+        dmConversations,
         selectConversation,
         sendMessage,
         setActiveConversation,
