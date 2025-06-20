@@ -113,7 +113,9 @@ export default function Chat() {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen w-screen bg-gray-900 text-white overflow-hidden">
+    <div className="flex h-screen w-screen bg-gray-900 text-white overflow-hidden">
+      {/* Espaço para Sidebar fixa */}
+      <div className="hidden md:block md:w-80 lg:w-96 flex-shrink-0" />
       <Sidebar
         dmConversations={dmConversations}
         onSelectConversation={selectConversation}
@@ -121,7 +123,7 @@ export default function Chat() {
         onSelectGlobalChat={() => setActiveConversation({ id: 'global', name: 'Chat Global', avatar: '🌐' })}
         onAddContact={() => setAddContactModalOpen(true)}
       />
-      <div className="flex flex-col flex-1 min-h-0">
+      <main className="flex flex-col flex-1 min-h-0 md:ml-80 lg:ml-96">
         <ChatHeader 
            conversationName={activeConversation.name}
            avatar={activeConversation.avatar}
@@ -173,7 +175,7 @@ export default function Chat() {
             </div>
           )}
         </div>
-      </div>
+      </main>
 
       {isAddContactModalOpen && (
         <AddContactModal

@@ -61,34 +61,37 @@ function MenuBar({ onProfile, onSettings, onLogout }) {
 export default function Sidebar({ allUsers, dmConversations, onSelectConversation, activeConversationId, onSelectGlobalChat }) {
   const { user, logout, setUser } = useAuth();
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true); // Sidebar sempre aberta por padrão
   const [showProfile, setShowProfile] = useState(false);
 
-  // Sidebar para mobile: menu hambúrguer
+  // Sidebar para mobile e desktop: menu hambúrguer sempre visível
   return (
     <>
-      {/* Botão hambúrguer visível só no mobile */}
+      {/* Botão hambúrguer sempre visível */}
       <button
-        className="md:hidden fixed top-4 left-4 z-50 bg-gray-900 p-2 rounded-full border border-green-400 text-green-400 shadow-lg"
-        onClick={() => setOpen(true)}
-        aria-label="Abrir menu"
+        className="fixed top-4 left-4 z-50 bg-gray-900 p-2 rounded-full border border-green-400 text-green-400 shadow-lg md:top-6 md:left-6"
+        onClick={() => setOpen(o => !o)}
+        aria-label={open ? 'Fechar menu' : 'Abrir menu'}
       >
-        <FiMenu size={28} />
+        {open ? <FiX size={28} /> : <FiMenu size={28} />}
       </button>
-      {/* Overlay e sidebar mobile */}
-      <div className={`fixed inset-0 z-40 bg-black/40 transition-opacity ${open ? 'opacity-100' : 'opacity-0 pointer-events-none'} md:hidden`} onClick={() => setOpen(false)} />
-      <aside className={`fixed top-0 left-0 h-full w-11/12 max-w-xs sm:w-72 bg-gray-800 flex flex-col border-r border-gray-700 z-50 transform transition-transform duration-300 md:static md:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'} md:w-80 lg:w-96`} style={{maxHeight: '100dvh'}}>
+      {/* Sidebar fixa, sempre visível se open=true */}
+      <aside className={`fixed top-0 left-0 h-full w-11/12 max-w-xs sm:w-72 bg-gray-800 flex flex-col border-r border-gray-700 z-50 transition-transform duration-300 ${open ? 'translate-x-0' : '-translate-x-full'} md:static md:translate-x-0 md:w-80 lg:w-96`} style={{maxHeight: '100dvh'}}>
+        {/* MenuBar sempre no topo da sidebar no desktop, base no mobile */}
+        <div className="md:sticky md:top-0 md:z-10">
+          <MenuBar
+            onProfile={() => setShowProfile(true)}
+            onSettings={() => navigate('/settings')}
+            onLogout={() => { logout(); navigate('/login'); }}
+          />
+        </div>
         <div className="p-3 sm:p-4 flex items-center justify-between border-b border-gray-700">
           <div className="flex items-center">
             <img src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.displayName}&background=random`} alt="avatar" className="h-9 w-9 sm:h-10 sm:w-10 rounded-full object-cover mr-2 sm:mr-3 border-2 border-green-400 shadow" />
             <h2 className="font-bold text-lg sm:text-xl truncate max-w-[120px] sm:max-w-xs">{user?.displayName}</h2>
           </div>
-          <div className="flex items-center gap-1 sm:gap-2">
-            <button onClick={() => navigate('/settings')} className="text-gray-400 hover:text-green-400 text-lg sm:text-xl" title="Configurações"><FiSettings /></button>
-            <button className="md:hidden ml-1 sm:ml-2 text-gray-400 hover:text-red-400" onClick={() => setOpen(false)} aria-label="Fechar menu"><FiX size={22} className="sm:hidden" /><FiX size={24} className="hidden sm:inline" /></button>
-          </div>
         </div>
-        <div className="flex-1 overflow-y-auto p-1 sm:p-2 space-y-1 custom-scrollbar" style={{maxHeight: 'calc(100dvh - 64px)'}}>
+        <div className="flex-1 overflow-y-auto p-1 sm:p-2 space-y-1 custom-scrollbar" style={{maxHeight: 'calc(100dvh - 120px)'}}>
           {/* Seção de Conversas Ativas */}
           <h3 className="px-2 sm:px-3 py-2 text-xs font-bold text-gray-400 uppercase flex items-center gap-2"><FiMessageSquare/> Conversas</h3>
           <ConversationItem 
@@ -108,7 +111,6 @@ export default function Sidebar({ allUsers, dmConversations, onSelectConversatio
               active={activeConversationId === conv.id}
             />
           ))}
-
           {/* Seção de Usuários Online */}
           <h3 className="px-2 sm:px-3 py-2 text-xs font-bold text-gray-400 uppercase mt-3 sm:mt-4 flex items-center gap-2"><FiUsers/> Usuários</h3>
           {(allUsers || []).map(u => (
@@ -119,14 +121,7 @@ export default function Sidebar({ allUsers, dmConversations, onSelectConversatio
             />
           ))}
         </div>
-        {/* Espaço para menu bar fixo no mobile */}
-        <div className="block md:hidden h-14" />
       </aside>
-      <MenuBar
-        onProfile={() => setShowProfile(true)}
-        onSettings={() => navigate('/settings')}
-        onLogout={() => { logout(); navigate('/login'); }}
-      />
       {showProfile && (
         <ProfileModal
           user={user}
