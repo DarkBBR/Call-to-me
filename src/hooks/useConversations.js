@@ -78,6 +78,7 @@ export const useConversations = () => {
         const storedUsers = JSON.parse(localStorage.getItem(ALL_USERS_KEY) || '[]');
         const storedConversations = JSON.parse(localStorage.getItem(CONVERSATIONS_KEY) || '{}');
 
+        // Corrigir: garantir que allUsers sempre contenha todos os usuários online (exceto o próprio)
         setAllUsers(storedUsers.filter(u => u.name !== user.name));
 
         if (!storedConversations.global) {
@@ -93,7 +94,22 @@ export const useConversations = () => {
             socketRef.current?.emit('join_room', 'global');
         }
 
+        // Atualizar lista de usuários online em tempo real
+        socketRef.current?.emit('get_online_users');
+
     }, [user, CONVERSATIONS_KEY, socketRef]);
+
+    // Receber lista de usuários online do servidor (se implementado)
+    useEffect(() => {
+        if (!socketRef.current) return;
+        const handler = (users) => {
+            setAllUsers(users.filter(u => u.name !== user.name));
+        };
+        socketRef.current.on && socketRef.current.on('online_users', handler);
+        return () => {
+            socketRef.current.off && socketRef.current.off('online_users', handler);
+        };
+    }, [user, socketRef]);
 
     // Salvar conversas no localStorage
     useEffect(() => {

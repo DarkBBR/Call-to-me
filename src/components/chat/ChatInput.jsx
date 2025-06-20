@@ -84,7 +84,7 @@ export default function ChatInput({ onSendMessage, onSendAudio, onSendFile, onTy
   };
 
   return (
-    <div className="p-4 bg-gray-800 border-t border-gray-700 relative">
+    <div className="p-4 bg-gray-800 border-t border-gray-700 relative w-full md:static md:bottom-auto md:left-auto md:w-auto fixed bottom-0 left-0 z-30">
       {/* Preview de imagem selecionada */}
       {imagePreview && (
         <div className="mb-4 flex flex-col items-center gap-2 bg-gray-900 p-4 rounded-xl border border-green-700 shadow-lg relative">
