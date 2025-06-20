@@ -129,7 +129,7 @@ export default function Chat() {
         />
         
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {filteredMessages.map((msg) => (
+          {(filteredMessages || []).map((msg) => (
             editingMsgId === msg.id ? (
               <div key={msg.id} className="flex w-full mb-3">
                 <input

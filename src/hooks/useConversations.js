@@ -17,8 +17,7 @@ export const useConversations = () => {
     const [conversations, setConversations] = useState({});
     const [activeConversation, setActiveConversation] = useState({ id: 'global', name: 'Chat Global', avatar: '🌐' });
 
-    // Chave de localStorage específica do usuário
-    const CONVERSATIONS_KEY = `${CONVERSATIONS_KEY_PREFIX}${user.name}`;
+    const CONVERSATIONS_KEY = user ? `${CONVERSATIONS_KEY_PREFIX}${user.name}` : null;
 
     // Lógica do Socket
     const socketRef = useSocket({
@@ -59,6 +58,8 @@ export const useConversations = () => {
 
     // Carregar usuários e conversas do localStorage
     useEffect(() => {
+        if (!user || !CONVERSATIONS_KEY) return;
+
         const storedUsers = JSON.parse(localStorage.getItem(ALL_USERS_KEY) || '[]');
         const storedConversations = JSON.parse(localStorage.getItem(CONVERSATIONS_KEY) || '{}');
 
@@ -77,15 +78,17 @@ export const useConversations = () => {
             socketRef.current?.emit('join_room', 'global');
         }
 
-    }, [user.name, CONVERSATIONS_KEY, socketRef]);
+    }, [user, CONVERSATIONS_KEY, socketRef]);
 
     // Salvar conversas no localStorage
     useEffect(() => {
+        if (!user || !CONVERSATIONS_KEY) return;
         localStorage.setItem(CONVERSATIONS_KEY, JSON.stringify(conversations));
-    }, [conversations, CONVERSATIONS_KEY]);
+    }, [conversations, CONVERSATIONS_KEY, user]);
 
 
     const selectConversation = (otherUser) => {
+        if (!user) return;
         const roomId = createRoomId(user.name, otherUser.name);
         if (!conversations[roomId]) {
             setConversations(prev => ({ ...prev, [roomId]: [] }));
@@ -95,7 +98,7 @@ export const useConversations = () => {
     };
     
     const sendMessage = (text, image = null) => {
-        if (!socketRef.current || (!text.trim() && !image)) return;
+        if (!user || !socketRef.current || (!text.trim() && !image)) return;
         let to = null;
         if (activeConversation.id !== 'global') {
             // O destinatário é o outro usuário na sala
@@ -124,6 +127,7 @@ export const useConversations = () => {
     const dmConversations = Object.keys(conversations)
         .filter(roomId => roomId !== 'global')
         .map(roomId => {
+            if (!user) return null;
             const otherUserName = roomId.split('--').find(name => name !== user.name);
             const otherUser = allUsers.find(u => u.name === otherUserName) || { name: otherUserName, displayName: otherUserName };
             const lastMessage = conversations[roomId].slice(-1)[0];
@@ -132,7 +136,7 @@ export const useConversations = () => {
                 user: otherUser,
                 lastMessage: lastMessage?.text || lastMessage?.image ? (lastMessage.image ? '📷 Imagem' : lastMessage.text) : 'Nenhuma mensagem ainda'
             };
-        });
+        }).filter(Boolean);
 
     // Editar mensagem
     const editMessage = (msgId, newText) => {
@@ -147,7 +151,7 @@ export const useConversations = () => {
 
     // Responder mensagem (reply)
     const replyMessage = (replyToMsg, text) => {
-        if (!socketRef.current || !text.trim()) return;
+        if (!user || !socketRef.current || !text.trim()) return;
         let to = null;
         if (activeConversation.id !== 'global') {
             to = activeConversation.id.split('--').find(n => n !== user.name);

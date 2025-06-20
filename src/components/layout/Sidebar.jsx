@@ -69,7 +69,7 @@ export default function Sidebar({ allUsers, dmConversations, onSelectConversatio
               onClick={() => { onSelectGlobalChat(); setOpen(false); }}
               active={activeConversationId === 'global'}
           />
-          {dmConversations.map(conv => (
+          {(dmConversations || []).map(conv => (
             <ConversationItem 
               key={conv.id}
               name={conv.user.displayName}
@@ -82,7 +82,7 @@ export default function Sidebar({ allUsers, dmConversations, onSelectConversatio
 
           {/* Seção de Usuários Online */}
           <h3 className="px-3 py-2 text-xs font-bold text-gray-400 uppercase mt-4 flex items-center gap-2"><FiUsers/> Usuários</h3>
-          {allUsers.map(u => (
+          {(allUsers || []).map(u => (
             <UserItem 
               key={u.name} 
               user={u}
