@@ -114,8 +114,8 @@ export default function Chat() {
 
   return (
     <div className="flex h-screen w-screen bg-gray-900 text-white overflow-hidden">
-      {/* Espaço para Sidebar fixa no desktop */}
-      <div className="hidden md:block md:w-80 lg:w-96 flex-shrink-0" />
+      {/* MenuBar já está fixo à esquerda pelo Sidebar.jsx */}
+      {/* Sidebar é controlada pelo Sidebar.jsx e cobre o chat ao abrir */}
       <Sidebar
         dmConversations={dmConversations}
         onSelectConversation={selectConversation}
@@ -123,57 +123,60 @@ export default function Chat() {
         onSelectGlobalChat={() => setActiveConversation({ id: 'global', name: 'Chat Global', avatar: '🌐' })}
         onAddContact={() => setAddContactModalOpen(true)}
       />
-      <main className="flex flex-col flex-1 min-h-0 w-full md:ml-80 lg:ml-96 transition-all duration-300">
-        <ChatHeader 
-           conversationName={activeConversation.name}
-           avatar={activeConversation.avatar}
-           onSearch={setSearch}
-        />
-        <div className="flex-1 min-h-0 flex flex-col">
-          <div className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-4 min-h-0 max-h-[calc(100dvh-180px)] md:max-h-[calc(100vh-140px)]">
-            {(filteredMessages || []).map((msg) => (
-              editingMsgId === msg.id ? (
-                <div key={msg.id} className="flex w-full mb-3">
-                  <input
-                    className="flex-1 p-2 rounded bg-gray-900 border border-gray-700 text-white mr-2"
-                    value={editingText}
-                    onChange={e => setEditingText(e.target.value)}
-                    onKeyDown={e => { if (e.key === 'Enter') handleEditSubmit(); }}
-                    autoFocus
-                  />
-                  <button onClick={handleEditSubmit} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Salvar</button>
-                  <button onClick={() => setEditingMsgId(null)} className="ml-2 bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded">Cancelar</button>
-                </div>
-              ) : (
-                <MessageBubble
-                  key={msg.id}
-                  msg={{ ...msg, status: readIds.includes(msg.id) ? 'read' : msg.status }}
-                  isOwn={msg.user.name === user.name}
-                  onEdit={() => handleEdit(msg)}
-                  onReply={() => handleReply(msg)}
-                  onDelete={() => handleDelete(msg)}
-                />
-              )
-            ))}
-            {typingUser && (
-              <div className="text-green-400 text-xs font-semibold px-2 py-1 animate-pulse">{typingUser} está digitando...</div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-          <ChatInput 
-            onSendMessage={replyToMsg ? (text) => handleReplySend(text) : sendMessage}
-            onSendFile={handleSendFile}
-            onSendAudio={handleSendAudio}
-            onTyping={handleTyping}
-            onStopTyping={handleStopTyping}
+      {/* Conteúdo principal do chat */}
+      <main className="flex flex-col flex-1 min-h-0 w-full items-center justify-center">
+        <div className="flex flex-col flex-1 w-full max-w-2xl min-h-0 bg-gray-900">
+          <ChatHeader 
+             conversationName={activeConversation.name}
+             avatar={activeConversation.avatar}
+             onSearch={setSearch}
           />
-          {replyToMsg && (
-            <div className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-gray-800 border border-green-400 rounded-xl px-4 py-2 flex items-center gap-2 z-50">
-              <span className="text-green-300 font-bold">Respondendo:</span>
-              <span className="truncate max-w-xs">{replyToMsg.text}</span>
-              <button onClick={() => setReplyToMsg(null)} className="ml-2 text-red-400 hover:text-red-600">Cancelar</button>
+          <div className="flex-1 min-h-0 flex flex-col">
+            <div className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-4 min-h-0 max-h-[calc(100dvh-180px)] md:max-h-[calc(100vh-140px)]">
+              {(filteredMessages || []).map((msg) => (
+                editingMsgId === msg.id ? (
+                  <div key={msg.id} className="flex w-full mb-3">
+                    <input
+                      className="flex-1 p-2 rounded bg-gray-900 border border-gray-700 text-white mr-2"
+                      value={editingText}
+                      onChange={e => setEditingText(e.target.value)}
+                      onKeyDown={e => { if (e.key === 'Enter') handleEditSubmit(); }}
+                      autoFocus
+                    />
+                    <button onClick={handleEditSubmit} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Salvar</button>
+                    <button onClick={() => setEditingMsgId(null)} className="ml-2 bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded">Cancelar</button>
+                  </div>
+                ) : (
+                  <MessageBubble
+                    key={msg.id}
+                    msg={{ ...msg, status: readIds.includes(msg.id) ? 'read' : msg.status }}
+                    isOwn={msg.user.name === user.name}
+                    onEdit={() => handleEdit(msg)}
+                    onReply={() => handleReply(msg)}
+                    onDelete={() => handleDelete(msg)}
+                  />
+                )
+              ))}
+              {typingUser && (
+                <div className="text-green-400 text-xs font-semibold px-2 py-1 animate-pulse">{typingUser} está digitando...</div>
+              )}
+              <div ref={messagesEndRef} />
             </div>
-          )}
+            <ChatInput 
+              onSendMessage={replyToMsg ? (text) => handleReplySend(text) : sendMessage}
+              onSendFile={handleSendFile}
+              onSendAudio={handleSendAudio}
+              onTyping={handleTyping}
+              onStopTyping={handleStopTyping}
+            />
+            {replyToMsg && (
+              <div className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-gray-800 border border-green-400 rounded-xl px-4 py-2 flex items-center gap-2 z-50">
+                <span className="text-green-300 font-bold">Respondendo:</span>
+                <span className="truncate max-w-xs">{replyToMsg.text}</span>
+                <button onClick={() => setReplyToMsg(null)} className="ml-2 text-red-400 hover:text-red-600">Cancelar</button>
+              </div>
+            )}
+          </div>
         </div>
       </main>
 
