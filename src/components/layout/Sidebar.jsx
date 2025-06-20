@@ -61,23 +61,44 @@ function MenuBar({ onProfile, onSettings, onLogout }) {
 export default function Sidebar({ allUsers, dmConversations, onSelectConversation, activeConversationId, onSelectGlobalChat }) {
   const { user, logout, setUser } = useAuth();
   const navigate = useNavigate();
-  const [open, setOpen] = useState(true); // Sidebar sempre aberta por padrão
+  const [open, setOpen] = useState(window.innerWidth >= 768); // Aberta por padrão no desktop
   const [showProfile, setShowProfile] = useState(false);
 
-  // Sidebar para mobile e desktop: menu hambúrguer sempre visível
+  // Fechar sidebar ao clicar fora no mobile
+  React.useEffect(() => {
+    if (open && window.innerWidth < 768) {
+      const handle = (e) => {
+        if (!e.target.closest('.sidebar-fixed')) setOpen(false);
+      };
+      document.addEventListener('mousedown', handle);
+      return () => document.removeEventListener('mousedown', handle);
+    }
+  }, [open]);
+
+  // Atualizar estado ao redimensionar
+  React.useEffect(() => {
+    const handleResize = () => setOpen(window.innerWidth >= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
     <>
-      {/* Botão hambúrguer sempre visível */}
+      {/* Botão menu sempre visível, mas fora da sidebar */}
       <button
         className="fixed top-4 left-4 z-50 bg-gray-900 p-2 rounded-full border border-green-400 text-green-400 shadow-lg md:top-6 md:left-6"
         onClick={() => setOpen(o => !o)}
         aria-label={open ? 'Fechar menu' : 'Abrir menu'}
+        style={{ pointerEvents: open && window.innerWidth < 768 ? 'none' : 'auto' }}
       >
         {open ? <FiX size={28} /> : <FiMenu size={28} />}
       </button>
-      {/* Sidebar fixa, sempre visível se open=true */}
-      <aside className={`fixed top-0 left-0 h-full w-11/12 max-w-xs sm:w-72 bg-gray-800 flex flex-col border-r border-gray-700 z-50 transition-transform duration-300 ${open ? 'translate-x-0' : '-translate-x-full'} md:static md:translate-x-0 md:w-80 lg:w-96`} style={{maxHeight: '100dvh'}}>
-        {/* MenuBar sempre no topo da sidebar no desktop, base no mobile */}
+      {/* Overlay escuro no mobile quando sidebar aberta */}
+      {open && window.innerWidth < 768 && (
+        <div className="fixed inset-0 z-40 bg-black/60 transition-opacity" />
+      )}
+      {/* Sidebar fixa no desktop, sobreposta no mobile */}
+      <aside className={`sidebar-fixed fixed top-0 left-0 h-full w-11/12 max-w-xs sm:w-72 bg-gray-800 flex flex-col border-r border-gray-700 z-50 transition-transform duration-300 ${open ? 'translate-x-0' : '-translate-x-[-110%]'} md:static md:translate-x-0 md:w-80 lg:w-96`} style={{maxHeight: '100dvh'}}>
         <div className="md:sticky md:top-0 md:z-10">
           <MenuBar
             onProfile={() => setShowProfile(true)}
